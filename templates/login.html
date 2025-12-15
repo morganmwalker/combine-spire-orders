@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="/static/script.js" defer></script>
+</head>
+<body>
+    <div class="center-wrapper login-area">
+        <span>
+            <h2>Login</h2>
+            {{if .Error}}
+                <p style="color: red;">{{.Error}}</p>
+            {{end}}
+            <form method="POST" action="/login">
+                <input type="text" id="username" name="username" placeholder="Username"><br>
+                <input type="password" id="password" name="password" placeholder="Password"><br><br>
+                <input type="submit" value="Log In">
+            </form>
+        </span>
+    </div>
+</body>
+</html>

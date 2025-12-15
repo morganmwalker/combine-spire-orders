@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Homepage</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="/static/script.js" defer></script>
+</head>
+<body>
+    <div class="header">
+        <h2>Welcome!</h2>
+        <p>Select the sales orders you want to combine and hit submit.</p>
+    </div>
+
+    <!-- Input field for filtering by customer prefix -->
+    <form id="filterForm">
+        <label for="customerPrefix">Customer Prefix:</label>
+        <input type="text" id="customerPrefix" name="customerPrefix" placeholder="Enter customer prefix" oninput="filterList()">
+    </form>
+    <div class="center-wrapper"> 
+        <button id="addOpenButton" type="button" onclick="addAllOpenOrders()">Select All</button>
+    </div>
+    <div class="order-container"> <div class="order-column">
+        <h2>Open Sales Orders</h2>
+        {{if .}}
+        <ul id="orderList">
+            {{range .}}
+            <li data-order-no="{{.orderNo}}" data-customer-no="{{.customer.customerNo}}" data-order-id="{{.id}}" data-po-no="{{.customerPO}}">
+                <span class="order-data">
+                    <strong>Order:</strong> {{.orderNo}}
+                </span>
+                
+                <span class="customer-data">
+                    <strong>Customer:</strong> {{.customer.customerNo}}
+                </span>
+                
+                <button type="button" onclick="addToSelected(this)">Select</button>
+            </li>
+            {{end}}
+        </ul>
+            {{else}}
+            <p>No sales orders found.</p>
+            {{end}}
+        </div> 
+        <div class="order-column">
+            <h2>Selected Orders</h2>
+            <ul id="selectedOrders"></ul>
+        </div> 
+    </div> <button id="submitButton" type="button" onclick="submitSelectedOrders(this)" disabled>Submit</button>
+    <p id="messageArea"></p>
+
+    <!-- Log out button -->
+    <form method="POST" action="/logout">
+        <input type="submit" value="Log Out">
+    </form>
+
+    <div id="deleteModal">
+        <div class="modal-content">
+            
+            <h2>Orders Submitted Successfully!</h2>
+            <p id="modalMessage">Do you want to delete <span id="orderCount">X</span> source sales orders?</p>
+            <span>
+                <button id="confirmDeleteBtn" class="modal-button-confirm">Yes, Delete Orders</button>
+                <button id="cancelDeleteBtn" class="modal-button-cancel">No, Keep Orders</button>
+            </span>
+        </div>
+    </div>
+</body>
+</html>
