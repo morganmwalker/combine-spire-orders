@@ -127,7 +127,7 @@ func (a *App) authMiddleware(next http.Handler) http.Handler {
     return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
         session, err := a.Store.Get(r, sessionName)
         if err != nil {
-            http.Error(w, "Session error", http.StatusInternalServerError)
+            http.Redirect(w, r, "/", http.StatusSeeOther)
             return
         }
 
