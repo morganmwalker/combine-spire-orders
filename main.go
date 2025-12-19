@@ -453,6 +453,9 @@ func main() {
     log.Printf("Using: %v", rootURL)
 
     key := os.Getenv("SECRET_KEY")
+	if len(key) < 32 {
+        log.Fatal("SECRET_KEY must have a length of at least 32.")
+    }
     sessionStore := sessions.NewCookieStore([]byte(key))
 
     // Initialize client instance
