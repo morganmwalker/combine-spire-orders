@@ -1,8 +1,11 @@
 package main
 
 import (
-    _ "embed"
+    "embed"
+    "io/fs"
     "os"
+    "os/exec"
+    "runtime"
 	"html/template"
     "fmt"
 	"log"
@@ -16,6 +19,18 @@ import (
 
 //go:embed customers.json
 var settingsFile []byte
+
+//go:embed templates/*.html
+var templateFS embed.FS
+
+//go:embed static/*
+var staticFS embed.FS
+
+var tmpl *template.Template
+
+func init() {
+    tmpl = template.Must(template.ParseFS(templateFS, "templates/*.html"))
+}
 
 type App struct {
     Client *spireclient.SpireClient
@@ -32,12 +47,6 @@ const passwordKey = "spirePassword"
 // Define the context key
 type key string
 const agentKey key = "spireAgent"
-
-var tmpl *template.Template
-
-func init() {
-    tmpl = template.Must(template.ParseGlob("templates/*.html"))
-}
 
 func (a *App) loginSubmit(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
@@ -469,7 +478,8 @@ func main() {
 
     router := http.NewServeMux()
 
-    fileServer := http.FileServer(http.Dir("./static"))
+    staticSub, _ := fs.Sub(staticFS, "static")
+    fileServer := http.FileServer(http.FS(staticSub))
     router.Handle("/static/", http.StripPrefix("/static", fileServer))
 
     router.HandleFunc("/", app.loginHandler)
@@ -480,6 +490,16 @@ func main() {
     router.Handle("/home", app.authMiddleware(http.HandlerFunc(app.homeHandler)))
     router.Handle("/submit_selected_orders", app.authMiddleware(http.HandlerFunc(app.submitSelectedOrdersHandler)))
     router.Handle("/delete_source_orders", app.authMiddleware(http.HandlerFunc(app.deleteOrdersHandler)))
+
+    url := "http://localhost:8080"
+    log.Printf("Opening %s in browser...", url)
+
+    switch runtime.GOOS {
+    case "windows":
+        exec.Command("rundll32", "url.dll,FileProtocolHandler", url).Start()
+    case "darwin":
+        exec.Command("open", url).Start()
+    }
 
     log.Println("Server listening on :8080")
     if err := http.ListenAndServe(":8080", router); err != nil {
